@@ -1,9 +1,15 @@
+TODO note:
+    TLS 1.3 is not well supported because python itself doesn't yet cannot let you control the 1.3 ciphersuites and PSK ciphers are not normally in the default ciphersuites for 1.3
+    "internal error" can result when a supported TLS protocol is not enable (e.g. TLS1_2 is recommended)
+    when key negogiation fails, the error often looks like __________
+
 # sslpsk3
 
 [![PyPI version](https://badge.fury.io/py/sslpsk3.svg)](https://badge.fury.io/py/sslpsk3)
 
-This module adds TLS-PSK support to the Python 2.7 and 3.x `ssl`
-package. Simply use
+This module adds TLS-PSK support to the Python 3.7+ `ssl` package.
+
+Simply use
 
     sslpsk3.wrap_socket(sock, psk=b'...', ...)
 

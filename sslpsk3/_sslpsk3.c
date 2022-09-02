@@ -16,27 +16,47 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
-#include <openssl/ssl.h>
+// Rather than requiring the openssl headers to be found at build time, we just declare the few things from openssl/ssl.h here
+//#include <openssl/ssl.h>
+// .>.>.>.>.>.>.>.>.>.>.>.>.>.>.>.>.>.>.>.>.>
+typedef void SSL;
+typedef void SSL_CTX;
+
+typedef unsigned int (*SSL_psk_client_cb_func)(SSL *ssl,
+                                               const char *hint,
+                                               char *identity,
+                                               unsigned int max_identity_len,
+                                               unsigned char *psk,
+                                               unsigned int max_psk_len);
+void SSL_CTX_set_psk_client_callback(SSL_CTX *ctx, SSL_psk_client_cb_func cb);
+void SSL_set_psk_client_callback(SSL *ssl, SSL_psk_client_cb_func cb);
+
+typedef unsigned int (*SSL_psk_server_cb_func)(SSL *ssl,
+                                               const char *identity,
+                                               unsigned char *psk,
+                                               unsigned int max_psk_len);
+void SSL_CTX_set_psk_server_callback(SSL_CTX *ctx, SSL_psk_server_cb_func cb);
+void SSL_set_psk_server_callback(SSL *ssl, SSL_psk_server_cb_func cb);
+
+int SSL_use_psk_identity_hint(SSL *s, const char *identity_hint);
+
+void SSL_set_accept_state(SSL *s);
+// <.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.<.
+
 
 /* Copy PySSLObject/PySSLSocket from _ssl.c to expose the SSL*. */
-#if !defined(PY_MAJOR_VERSION) || (PY_VERSION_HEX < 0x02070000)
-#error Only Python 2.7 and later are supported
+#if !defined(PY_MAJOR_VERSION) || (PY_VERSION_HEX < 0x03070000)
+#error Only Python 3.7 and later are supported
 #endif
 
 #define PY_VERSION_BETWEEN(start, end) ((PY_VERSION_HEX >= start) && \
                                         (PY_VERSION_HEX < end))
 
-typedef struct {
+typedef struct { // confirmed same from python 3.7 to 3.11
     PyObject_HEAD
-#if PY_VERSION_BETWEEN(0x02070000, 0x03000000)
-    void*          PySocketSockObject;
-#endif
-    PyObject*      socket;
-#if PY_VERSION_BETWEEN(0x03000000, 0x03020000)
-    void*          SSL_CTX;
-#endif
-    SSL*           ssl;
-    /* etc */
+    PyObject *Socket; /* weakref to socket on which we're layered */
+    SSL *ssl;
+    /* etc ... */
 } PySSLSocket;
 
 #if PY_VERSION_BETWEEN(0x02070000, 0x03000000)

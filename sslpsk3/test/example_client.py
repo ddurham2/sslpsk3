@@ -11,7 +11,7 @@ def client(host, port, psk):
     tcp_socket.connect((host, port))
 
     ssl_sock = sslpsk3.wrap_socket(tcp_socket,
-                                  ssl_version=ssl.PROTOCOL_TLSv1,
+                                  ssl_version=ssl.PROTOCOL_TLSv1_2,
                                   ciphers='ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH',
                                   psk=lambda hint: (PSKS[hint], b'client1'))
 
